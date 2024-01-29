@@ -1,0 +1,106 @@
+---
+title: 'R Lab 1: Incidence'
+subtitle: "STAT 244NF: Infectious Disease Modeling"
+author: "YOUR NAME HERE"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In this lab, we are going to work with the *incidence* package, which was developed to so that users could easily compute, manipulate, visualize, and model incidences from data with dates. This lab was motivated by parts of the worked example on Ebola that is presented in the *incidence* package vignette, by Jombart and Kamvar (https://cran.r-project.org/web/packages/incidence/vignettes/overview.html).
+
+## Installing and loading packages
+
+If you using RStudio in the same place that you were for Lab 0, then you have already installed the *incidence* package. You can check to see if it is installed by clicking on the **Packages** tab in the lower right window of your RStudio session and typing incidence into the search bar. If it is not installed, please install it now. 
+
+#### Run the following code chunk to load the incidence library. We will also need to load ggplot2 and outbreaks. Please add two lines to the code chunk below after `library(incidence)` to load ggplot2 and outbreaks.
+
+```{r}
+# install.packages("incidence)
+
+library(incidence)
+
+```
+
+## Examining the data: Simulated Ebola data
+
+#### We will be working with the `ebola_sim` data, available in the `outbreaks` package. Although it loads automatically with the package, run the following line of code to make `ebola_sim` show up under Values in the Environment tab in the upper right corner. 
+
+```{r}
+data("ebola_sim")
+```
+
+#### The `ebola_sim` is a different kind of object than you may be used to. To find out more about it, we can use the functions `class` and `str` (structure) and pass the variable `ebola_sim` to them (e.g., run `class(ebola_sim)`). In the empty code chunk below, determine the class and structure of `ebola_sim`.
+
+```{r}
+
+```
+
+#### Based on the output from `str(ebola_sim)`, we can see that `ebola_sim` is a list of two data frames, which are called `linelist` and `contacts`. Let's get these data into a more familiar form, namely, two data frames. In the code chunk below, assign `ebola_sim$linelist` to `ebola_linelist` and assign `ebola_sim$contacts` to `ebola_sim_contacts`.
+
+```{r}
+ 
+```
+
+#### Examine your two data frames. What do you notice about them (focus on `case_id` if you are not sure where to start)? 
+
+
+
+## Visualizing incidence
+
+#### The `ebola_linelist` data frame lists new cases of ebola and associated information about the cases, outcomes, etc. We can compute the daily incidence using the `incidence` function from the *incidence* package. Run the R code below to see how this works.
+
+```{r}
+ebola_incidence <- incidence(dates = ebola_linelist$date_of_onset, interval = 1)
+str(ebola_incidence)
+```
+
+#### The *incidence* package includes a wrapper plot function. Run the code below to plot daily incidence of ebola from this simulated data set.
+
+```{r warning=FALSE}
+plot(ebola_incidence)
+```
+#### Daily incidence is quite noisy for this data set, so it can be advantageous to plot weekly incidence instead. The `incidence` function helps us make this change easily if we specify a different interval. Create a new object, `ebola_incidence_weekly` by modifying the code we used to create `ebola_incidence` - change `interval = 1` to `interval = "1 week"`. Then plot the weekly incidence. Do this in the code chunk below:
+
+```{r}
+
+```
+
+#### We can do the same thing, but change the time scale to semi-weekly, starting on Saturday. Create a new object, `ebola_incidence_14` by modifying the code we used to create `ebola_incidence` - change `interval = 1` to `interval = "2 saturday weeks"`. Then plot the semi-weekly incidence. Do this in the code chunk below:
+
+```{r}
+
+```
+
+#### We can do the same thing, but change the time scale to monthly. Create a new object, `ebola_incidence_monthly` by modifying the code we used to create `ebola_incidence`. Use the help function for incidence (`?incidence`) to determine how to specify an interval of a month. Then plot the monthly incidence. Do this in the code chunk below:
+
+```{r}
+
+```
+
+## Modeling incidence via log-linear regression
+
+Next week, we will spend some time formally discussing statistical models for incidence, but we will get an informal introduction here. Incidence data can be modeled using the following model:
+
+$$
+\log(y)= b + r\times t
+$$
+where $y$ is the incidence (a count, here), $r$ is the growth rate, and $t$ is the number of days that have passed since a particular point in time. We can consider, informally, fitting a log-linear model to the beginning of this epidemic, when it is clearly growing - the first 20 weeks of the epidemic, and fitting a log linear model to these incidence counts:
+
+```{r}
+plot(ebola_incidence_weekly[1:20])
+
+epidemic_first_20 <- fit(ebola_incidence_weekly[1:20])
+epidemic_first_20
+
+plot(epidemic_first_20)
+plot(ebola_incidence_weekly[1:20], fit=epidemic_first_20)
+```
+
+
+## Challenge
+
+All of the plots you made above can be created using ggplot2. If you have finished everything above, then try to make these plots using ggplot2, instead. There are a number of ways you can think about doing this. 
